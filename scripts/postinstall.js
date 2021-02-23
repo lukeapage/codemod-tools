@@ -45,7 +45,7 @@ readdirSync(__dirname + '/../packages').forEach((directory) => {
   }
   const before = JSON.stringify(pkg);
   if (!pkg.name) {
-    pkg.name = '@codemod-tools/' + directory;
+    pkg.name = '@lukeapage/' + directory;
   }
   if (!pkg.version) {
     pkg.version = '0.0.0';

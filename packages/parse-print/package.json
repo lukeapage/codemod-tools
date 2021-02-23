@@ -28,8 +28,8 @@
     "babel-walk": "^3.0.0"
   },
   "scripts": {},
-  "repository": "https://github.com/lukeapage/codemod-tools/tree/master/packages/parse-print",
-  "bugs": "https://github.com/lukeapage/codemod-tools/issues",
+  "repository": "https://github.com/ForbesLindesay/codemod-tools/tree/master/packages/parse-print",
+  "bugs": "https://github.com/ForbesLindesay/codemod-tools/issues",
   "license": "MIT",
   "publishConfig": {
     "access": "public"
