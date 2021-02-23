@@ -1,6 +1,6 @@
 import * as t from '@babel/types';
-import {ScopeInfo} from '@codemod-tools/babel-scope';
-import filters, {NodeFilter} from '@codemod-tools/babel-filters';
+import {ScopeInfo} from '@lukeapage/babel-scope';
+import filters, {NodeFilter} from '@lukeapage/babel-filters';
 import NodeReplacements from './NodeReplacements';
 import {PrintOptions} from './Generator';
 import Removers from './Removers';

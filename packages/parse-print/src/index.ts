@@ -9,12 +9,12 @@ import analyzeScope, {
   isBlockScope,
   declaresArguments,
   declaresThis,
-} from '@codemod-tools/babel-scope';
+} from '@lukeapage/babel-scope';
 import filters, {
   Filter,
   NodeFilter,
   AllFilters,
-} from '@codemod-tools/babel-filters';
+} from '@lukeapage/babel-filters';
 import template, {TemplateHelpers} from './template';
 import {ancestor, AncestorFunction, AncestorVisitor} from 'babel-walk';
 import NodeReplacements from './NodeReplacements';
