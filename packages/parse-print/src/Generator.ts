@@ -62,7 +62,7 @@ export default class Generator extends (Printer as typeof PrinterTypes) {
   private readonly _codemodToolsSource: string;
   private readonly _codemodToolsOverrides: PrintOptionsOverride;
   private readonly _codemodToolsFormatOverridesStack = new Set<t.Node>();
-  private readonly this._copyUpto = 0;
+  private _copyUpto = 0;
   constructor({
     options,
     source,
