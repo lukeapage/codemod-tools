@@ -62,6 +62,7 @@ export default class Generator extends (Printer as typeof PrinterTypes) {
   private readonly _codemodToolsSource: string;
   private readonly _codemodToolsOverrides: PrintOptionsOverride;
   private readonly _codemodToolsFormatOverridesStack = new Set<t.Node>();
+  private readonly this._copyUpto = 0;
   constructor({
     options,
     source,
@@ -173,7 +174,12 @@ export default class Generator extends (Printer as typeof PrinterTypes) {
         isNextNodeModified.has(node) &&
         hasRange(node)
       ) {
-        this._codemodToolsEnterASTMode(node.range[1]);
+        let endRange= node.range[1];
+        if (node.type === 'Identifier' && (node.optional || node.typeAnnotation)) {
+          endRange = node.range[0] + node.name.length;
+        }
+
+        this._codemodToolsEnterASTMode(endRange);
       }
 
       if (opts.separator && i < realNodes.length - 1) {
@@ -235,7 +241,12 @@ export default class Generator extends (Printer as typeof PrinterTypes) {
     if (hasRange(node)) {
       this._codemodToolsEnterChunksMode(node.range[0]);
       const result = super.print(node, parent);
-      this._codemodToolsEnterASTMode(node.range[1]);
+
+      let endRange= node.range[1];
+      if (node.type === 'Identifier' && (node.optional || node.typeAnnotation)) {
+          endRange = node.range[0] + node.name.length;
+      }
+      this._codemodToolsEnterASTMode(endRange);
       return result;
     }
     return super.print(node, parent);
@@ -249,10 +260,14 @@ export default class Generator extends (Printer as typeof PrinterTypes) {
       throw new Error('Expected to be in chunks mode.');
     }
 
-    const {startIndex} = this._codemodToolsPrintMode;
+    let {startIndex} = this._codemodToolsPrintMode;
     this._codemodToolsPrintMode = {kind: PrintMode.Ast};
+
+    startIndex = Math.max(this._copyUpto, startIndex)
+
     // swap mode
     if (astStartIndex > startIndex) {
+      this._copyUpto = astStartIndex;
       this._append(
         this._codemodToolsSource.slice(startIndex, astStartIndex),
         true,
