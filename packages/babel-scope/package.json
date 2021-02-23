@@ -1,5 +1,5 @@
 {
-  "name": "@codemod-tools/babel-scope",
+  "name": "@lukeapage/babel-scope",
   "version": "0.0.0",
   "description": "",
   "main": "./lib/index.js",

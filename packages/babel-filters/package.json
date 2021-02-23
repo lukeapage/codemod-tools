@@ -1,5 +1,5 @@
 {
-  "name": "@codemod-tools/babel-filters",
+  "name": "@lukeapage/babel-filters",
   "version": "0.0.0",
   "description": "",
   "main": "./lib/index.js",
