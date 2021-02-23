@@ -4,8 +4,7 @@ Forked from https://github.com/ForbesLindesay/codemod-tools in order to not wait
 
 A fast, simple, type safe alternative to recast and jscodeshift. Inspired by [Falafel](https://github.com/substack/node-falafel), powered by [Babel](https://babeljs.io/).
 
-[![Build Status](https://img.shields.io/github/workflow/status/ForbesLindesay/codemod-tools/Test/master?style=for-the-badge)](https://github.com/ForbesLindesay/react-digit-input/actions?query=workflow%3ATest+branch%3Amaster)
-[![Rolling Versions](https://img.shields.io/badge/Rolling%20Versions-Enabled-brightgreen?style=for-the-badge)](https://rollingversions.com/ForbesLindesay/codemod-tools)
+[![Rolling Versions](https://img.shields.io/badge/Rolling%20Versions-Enabled-brightgreen?style=for-the-badge)](https://rollingversions.com/lukeapage/codemod-tools)
 
 Package Name | Version
 -------------|--------
