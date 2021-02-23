@@ -85,9 +85,9 @@ readdirSync(__dirname + '/../packages').forEach((directory) => {
   }
 
   pkg.repository =
-    'https://github.com/ForbesLindesay/codemod-tools/tree/master/packages/' +
+    'https://github.com/lukeapage/codemod-tools/tree/master/packages/' +
     directory;
-  pkg.bugs = 'https://github.com/ForbesLindesay/codemod-tools/issues';
+  pkg.bugs = 'https://github.com/lukeapage/codemod-tools/issues';
   // if (existsSync(__dirname + '/../docs/' + directory + '.md')) {
   //   pkg.homepage = 'https://www.atdatabases.org/docs/' + directory;
   //   writeFileSync(
