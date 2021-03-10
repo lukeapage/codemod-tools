@@ -53,6 +53,16 @@ declare class PrinterTypes {
   ): void;
 }
 
+function getEndRange(node: t.Node & {range: [number, number]}) {
+  let endRange = node.range[1];
+  if (node.type === 'Identifier' && (node.optional || node.typeAnnotation)) {
+    endRange = node.range[0] + node.name.length;
+  } else if ('typeAnnotation' in node && node.typeAnnotation && hasRange(node.typeAnnotation)) {
+    endRange = node.typeAnnotation.range[0];
+  }
+  return endRange;
+}
+
 export default class Generator extends (Printer as typeof PrinterTypes) {
   private readonly _codemodToolsStack = new Set<t.Node>();
   private _codemodToolsPrintMode: PrintChunksMode | PrintAstMode = {
@@ -167,23 +177,13 @@ export default class Generator extends (Printer as typeof PrinterTypes) {
         !isNodeModified.has(node) &&
         hasRange(node)
       ) {
-        let endRange= node.range[1];
-        if (node.type === 'Identifier' && (node.optional || node.typeAnnotation)) {
-          endRange = node.range[0] + node.name.length;
-        }
-
-        this._codemodToolsEnterChunksMode(endRange);
+        this._codemodToolsEnterChunksMode(node.range[1]);
       } else if (
         this._getMode() === PrintMode.Chunks &&
         isNextNodeModified.has(node) &&
         hasRange(node)
       ) {
-        let endRange= node.range[1];
-        if (node.type === 'Identifier' && (node.optional || node.typeAnnotation)) {
-          endRange = node.range[0] + node.name.length;
-        }
-
-        this._codemodToolsEnterASTMode(endRange);
+        this._codemodToolsEnterASTMode(getEndRange(node));
       }
 
       if (opts.separator && i < realNodes.length - 1) {
@@ -225,11 +225,7 @@ export default class Generator extends (Printer as typeof PrinterTypes) {
       }
       this._codemodToolsEnterASTMode(node.range[0]);
       const result = this.print(node, parent);
-      let endRange= node.range[1];
-      if (node.type === 'Identifier' && (node.optional || node.typeAnnotation)) {
-        endRange = node.range[0] + node.name.length;
-      }
-      this._codemodToolsEnterChunksMode(endRange);
+      this._codemodToolsEnterChunksMode(node.range[1]);
       return result;
     }
 
@@ -250,11 +246,7 @@ export default class Generator extends (Printer as typeof PrinterTypes) {
       this._codemodToolsEnterChunksMode(node.range[0]);
       const result = super.print(node, parent);
 
-      let endRange= node.range[1];
-      if (node.type === 'Identifier' && (node.optional || node.typeAnnotation)) {
-          endRange = node.range[0] + node.name.length;
-      }
-      this._codemodToolsEnterASTMode(endRange);
+      this._codemodToolsEnterASTMode(getEndRange(node));
       return result;
     }
     return super.print(node, parent);
@@ -268,7 +260,7 @@ export default class Generator extends (Printer as typeof PrinterTypes) {
       throw new Error('Expected to be in chunks mode.');
     }
 
-    let {startIndex} = this._codemodToolsPrintMode;
+    const {startIndex} = this._codemodToolsPrintMode;
     this._codemodToolsPrintMode = {kind: PrintMode.Ast};
 
     // swap mode

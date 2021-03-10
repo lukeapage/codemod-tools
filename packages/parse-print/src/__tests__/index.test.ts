@@ -1,6 +1,26 @@
 import parse, {types as t, filters, Path} from '../index';
 
 
+test('no double types - ObjectPattern', () => {
+  const code = ['export function initialize({ a }: Record<string, any> = {}){}'].join('\n');
+  const {
+    print,
+  } = parse(code, {
+    sourceType: 'module',
+    plugins: ['typescript'],
+  });
+  expect(print()).toEqual(code);
+})
+test('no double types - Spread', () => {
+  const code = ['export function initialize(...a: ReadonlyArray<string>){}'].join('\n');
+  const {
+    print,
+  } = parse(code, {
+    sourceType: 'module',
+    plugins: ['typescript'],
+  });
+  expect(print()).toEqual(code);
+})
 test('findDeclaration parents', () => {
   const code = [
     'function add() {}',
