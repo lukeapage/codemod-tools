@@ -57,9 +57,10 @@ function getEndRange(node: t.Node & {range: [number, number]}) {
   let endRange = node.range[1];
   if (node.type === 'Identifier' && (node.optional || node.typeAnnotation)) {
     endRange = node.range[0] + node.name.length;
-  } else if ('typeAnnotation' in node && node.typeAnnotation && hasRange(node.typeAnnotation)) {
+  } else if (node.type !== 'TSPropertySignature' && node.type !== 'TSTypeAliasDeclaration' && 'typeAnnotation' in node && node.typeAnnotation && hasRange(node.typeAnnotation)) {
     endRange = node.typeAnnotation.range[0];
   }
+  // console.log(node.type, endRange)
   return endRange;
 }
 
@@ -265,16 +266,20 @@ export default class Generator extends (Printer as typeof PrinterTypes) {
 
     // swap mode
     if (astStartIndex > startIndex) {
+      // console.log('>>>', this._codemodToolsSource.slice(startIndex, astStartIndex), startIndex, astStartIndex)
       this._append(
         this._codemodToolsSource.slice(startIndex, astStartIndex),
         true,
       );
+    } else {
+      // console.log('<<<', astStartIndex, startIndex)
     }
   }
   private _codemodToolsEnterChunksMode(chunksModeStart: number) {
     if (this._codemodToolsPrintMode.kind !== PrintMode.Ast) {
       throw new Error('Expected to be in ast mode.');
     }
+    // console.log('chunks mode', chunksModeStart)
     this._codemodToolsPrintMode = {
       kind: PrintMode.Chunks,
       startIndex: chunksModeStart,

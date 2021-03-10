@@ -1,6 +1,27 @@
 import parse, {types as t, filters, Path} from '../index';
 
-
+test('missing semi-colon 1', () => {
+  const code = ['export function x(y: {',
+    '  z: string;',
+    '}) {}'].join('\n');
+  const {
+    print,
+  } = parse(code, {
+    sourceType: 'module',
+    plugins: ['typescript'],
+  });
+  expect(print()).toEqual(code);
+})
+test.only('missing semi-colon 2', () => {
+  const code = ['type x = Readonly<$Object>;'].join('\n');
+  const {
+    print,
+  } = parse(code, {
+    sourceType: 'module',
+    plugins: ['typescript'],
+  });
+  expect(print()).toEqual(code);
+})
 test('no double types - ObjectPattern', () => {
   const code = ['export function initialize({ a }: Record<string, any> = {}){}'].join('\n');
   const {
