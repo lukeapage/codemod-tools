@@ -62,7 +62,6 @@ export default class Generator extends (Printer as typeof PrinterTypes) {
   private readonly _codemodToolsSource: string;
   private readonly _codemodToolsOverrides: PrintOptionsOverride;
   private readonly _codemodToolsFormatOverridesStack = new Set<t.Node>();
-  private _copyUpto = 0;
   constructor({
     options,
     source,
@@ -168,7 +167,12 @@ export default class Generator extends (Printer as typeof PrinterTypes) {
         !isNodeModified.has(node) &&
         hasRange(node)
       ) {
-        this._codemodToolsEnterChunksMode(node.range[1]);
+        let endRange= node.range[1];
+        if (node.type === 'Identifier' && (node.optional || node.typeAnnotation)) {
+          endRange = node.range[0] + node.name.length;
+        }
+
+        this._codemodToolsEnterChunksMode(endRange);
       } else if (
         this._getMode() === PrintMode.Chunks &&
         isNextNodeModified.has(node) &&
@@ -221,7 +225,11 @@ export default class Generator extends (Printer as typeof PrinterTypes) {
       }
       this._codemodToolsEnterASTMode(node.range[0]);
       const result = this.print(node, parent);
-      this._codemodToolsEnterChunksMode(node.range[1]);
+      let endRange= node.range[1];
+      if (node.type === 'Identifier' && (node.optional || node.typeAnnotation)) {
+        endRange = node.range[0] + node.name.length;
+      }
+      this._codemodToolsEnterChunksMode(endRange);
       return result;
     }
 
@@ -263,11 +271,8 @@ export default class Generator extends (Printer as typeof PrinterTypes) {
     let {startIndex} = this._codemodToolsPrintMode;
     this._codemodToolsPrintMode = {kind: PrintMode.Ast};
 
-    startIndex = Math.max(this._copyUpto, startIndex)
-
     // swap mode
     if (astStartIndex > startIndex) {
-      this._copyUpto = astStartIndex;
       this._append(
         this._codemodToolsSource.slice(startIndex, astStartIndex),
         true,

@@ -1,5 +1,24 @@
 import parse, {types as t, filters, Path} from '../index';
 
+
+test('findDeclaration parents', () => {
+  const code = [
+    'function add() {}',
+    'add();',
+    'const b = () => {};', 'b();'].join('\n');
+  const {
+    root,
+  } = parse(code);
+
+  const parentTypes: Array<string|null|undefined> = [];
+  for (const call of root.find(
+      filters.CallExpression
+  )) {
+    const callee = (call.get('callee') as Path<t.Identifier>).findDeclaration();
+    parentTypes.push(callee?.parentPath.node.type);
+  }
+  expect(parentTypes).toEqual(['FunctionDeclaration', 'VariableDeclarator']);
+});
 test('parse', () => {
   const code = [
     // Let's turn this function declaration into a variable declaration.

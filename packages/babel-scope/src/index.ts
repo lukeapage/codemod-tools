@@ -156,7 +156,7 @@ const firstPass = walk<Context>({
             state,
             declaration.id,
             parent,
-            parents.slice().reverse().slice(1),
+              [declaration, ...parents.slice().reverse()],
           );
         }
         return;
@@ -168,7 +168,7 @@ const firstPass = walk<Context>({
       for (let i = parents.length - 2; i >= 0; i--) {
         const parent = parents[i];
         if (isScope(parent)) {
-          setLocal(state, parent, node.id, parents.slice().reverse().slice(1));
+          setLocal(state, parent, node.id, parents.slice().reverse());
           return;
         }
       }
@@ -180,7 +180,7 @@ const firstPass = walk<Context>({
     }
     const id = (node as t.FunctionDeclaration).id;
     if (id) {
-      setLocal(ctx, node, id, parents.slice().reverse().slice(1));
+      setLocal(ctx, node, id, parents.slice().reverse());
     }
   },
   ClassDeclaration(node, state, parents) {
