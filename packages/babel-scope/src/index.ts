@@ -152,12 +152,10 @@ const firstPass = walk<Context>({
       const parent = parents[i];
       if ((node.kind === 'var' && isBlockScope(parent)) || isScope(parent)) {
         for (const declaration of node.declarations) {
-          declarePattern(
-            state,
-            declaration.id,
-            parent,
-              [declaration, ...parents.slice().reverse()],
-          );
+          declarePattern(state, declaration.id, parent, [
+            declaration,
+            ...parents.slice().reverse(),
+          ]);
         }
         return;
       }

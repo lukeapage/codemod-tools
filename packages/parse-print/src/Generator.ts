@@ -55,12 +55,15 @@ declare class PrinterTypes {
 
 function getEndRange(node: t.Node & {range: [number, number]}) {
   let endRange = node.range[1];
-  if (node.type === 'Identifier' && (node.optional || node.typeAnnotation)) {
-    endRange = node.range[0] + node.name.length;
-  } else if (node.type !== 'TSPropertySignature' && node.type !== 'TSTypeAliasDeclaration' && 'typeAnnotation' in node && node.typeAnnotation && hasRange(node.typeAnnotation)) {
+  if (
+    !node.type.startsWith('TS') &&
+    'typeAnnotation' in node &&
+    node.typeAnnotation &&
+    hasRange(node.typeAnnotation)
+  ) {
     endRange = node.typeAnnotation.range[0];
   }
-  // console.log(node.type, endRange)
+  //console.log(node.type, endRange)
   return endRange;
 }
 

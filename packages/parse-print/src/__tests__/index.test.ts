@@ -1,60 +1,88 @@
 import parse, {types as t, filters, Path} from '../index';
 
 test('missing semi-colon 1', () => {
-  const code = ['export function x(y: {',
-    '  z: string;',
-    '}) {}'].join('\n');
-  const {
-    print,
-  } = parse(code, {
+  const code = ['export function x(y: {', '  z: string;', '}) {}'].join('\n');
+  const {print} = parse(code, {
     sourceType: 'module',
     plugins: ['typescript'],
   });
   expect(print()).toEqual(code);
-})
-test.only('missing semi-colon 2', () => {
+});
+test('missing semi-colon 2', () => {
   const code = ['type x = Readonly<$Object>;'].join('\n');
-  const {
-    print,
-  } = parse(code, {
+  const {print} = parse(code, {
     sourceType: 'module',
     plugins: ['typescript'],
   });
   expect(print()).toEqual(code);
-})
+});
+test('missing semi-colon 3', () => {
+  const code = [
+    'export type X = {',
+    '  y?: z;',
+    '  [a: string]: ReadonlyArray<string> | (string | null | undefined);',
+    '};',
+  ].join('\n');
+  const {print} = parse(code, {
+    sourceType: 'module',
+    plugins: ['typescript'],
+  });
+  expect(print()).toEqual(code);
+});
+test('missing semi-colon 4', () => {
+  const code = [
+    'export type X = A & {',
+    '  b: c;',
+    '  [key: string]: unknown;',
+    '};',
+  ].join('\n');
+  const {print} = parse(code, {
+    sourceType: 'module',
+    plugins: ['typescript'],
+  });
+  expect(print()).toEqual(code);
+});
+test('missing optional', () => {
+  const code = [
+    'export function removeFromParents(id: any, parentToRemove?: any) {}',
+  ].join('\n');
+  const {print} = parse(code, {
+    sourceType: 'module',
+    plugins: ['typescript'],
+  });
+  expect(print()).toEqual(code);
+});
 test('no double types - ObjectPattern', () => {
-  const code = ['export function initialize({ a }: Record<string, any> = {}){}'].join('\n');
-  const {
-    print,
-  } = parse(code, {
+  const code = [
+    'export function initialize({ a }: Record<string, any> = {}){}',
+  ].join('\n');
+  const {print} = parse(code, {
     sourceType: 'module',
     plugins: ['typescript'],
   });
   expect(print()).toEqual(code);
-})
+});
 test('no double types - Spread', () => {
-  const code = ['export function initialize(...a: ReadonlyArray<string>){}'].join('\n');
-  const {
-    print,
-  } = parse(code, {
+  const code = [
+    'export function initialize(...a: ReadonlyArray<string>){}',
+  ].join('\n');
+  const {print} = parse(code, {
     sourceType: 'module',
     plugins: ['typescript'],
   });
   expect(print()).toEqual(code);
-})
+});
 test('findDeclaration parents', () => {
   const code = [
     'function add() {}',
     'add();',
-    'const b = () => {};', 'b();'].join('\n');
-  const {
-    root,
-  } = parse(code);
+    'const b = () => {};',
+    'b();',
+  ].join('\n');
+  const {root} = parse(code);
 
-  const parentTypes: Array<string|null|undefined> = [];
-  for (const call of root.find(
-      filters.CallExpression
-  )) {
+  const parentTypes: Array<string | null | undefined> = [];
+  for (const call of root.find(filters.CallExpression)) {
     const callee = (call.get('callee') as Path<t.Identifier>).findDeclaration();
     parentTypes.push(callee?.parentPath.node.type);
   }
