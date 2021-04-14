@@ -181,9 +181,9 @@ export default class Path<T extends t.Node> {
   }
 
   public findDeclaration(
-    this: Path<t.Identifier>,
+    this: Path<t.Identifier|t.JSXIdentifier>,
   ): Path<t.Identifier> | undefined {
-    const declaration = this._ctx.scope.declarations.get(this.node);
+    const declaration = this._ctx.scope.declarations.get(this.node) as Path<t.Identifier> | undefined;
     return (
       declaration && this._ctx.path(declaration.node, () => declaration.parents)
     );
@@ -266,7 +266,7 @@ export default class Path<T extends t.Node> {
     }
   }
 
-  public findReferences(this: Path<t.Identifier>): Path<t.Identifier>[] {
+  public findReferences(this: Path<t.Identifier>): Path<t.Identifier|t.JSXIdentifier>[] {
     const references = this._ctx.scope.references.get(this.node);
     return (references || []).map((r) =>
       this._ctx.path(r.node, () => r.parents),
@@ -367,11 +367,11 @@ export default class Path<T extends t.Node> {
      * Actual references to the property
      */
     const references: Path<
-      t.Identifier | t.MemberExpression | t.Pattern
+      t.Identifier | t.MemberExpression | t.Pattern | t.JSXIdentifier
     >[] = [];
 
     function findValueReferences(
-      valueReference: Path<t.Identifier | t.MemberExpression>,
+      valueReference: Path<t.Identifier | t.JSXIdentifier | t.MemberExpression>,
     ) {
       const parentPath = valueReference.parentPath;
       if (
@@ -397,7 +397,7 @@ export default class Path<T extends t.Node> {
     }
     function findPropertyReferences(
       namespaceReference: Path<
-        t.Expression | t.ImportDeclaration | t.VariableDeclarator | t.Pattern
+        t.Expression | t.ImportDeclaration | t.VariableDeclarator | t.Pattern | t.JSXIdentifier
       >,
     ) {
       namespaceReference.map(

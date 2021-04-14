@@ -24,20 +24,20 @@ export const declaresThis = declaresArguments;
 
 export interface ScopeInfo {
   // Map<ReferenceIdentifier, DeclarationIdentifier>
-  declarations: Map<t.Identifier, {node: t.Identifier; parents: t.Node[]}>;
+  declarations: Map<t.Identifier|t.JSXIdentifier, {node: t.Identifier|t.JSXIdentifier; parents: t.Node[]}>;
   // Map<DeclarationIdentifier, ReferenceIdentifier>
-  references: Map<t.Identifier, {node: t.Identifier; parents: t.Node[]}[]>;
+  references: Map<t.Identifier|t.JSXIdentifier, {node: t.Identifier|t.JSXIdentifier; parents: t.Node[]}[]>;
 
   // Map<DeclarationIdentifier, Scope>
-  declarationScope: Map<t.Identifier, {node: BlockScope; parents: t.Node[]}>;
+  declarationScope: Map<t.Identifier|t.JSXIdentifier, {node: BlockScope; parents: t.Node[]}>;
 
   argumentsDeclarations: Map<
-    t.Identifier,
+    t.Identifier|t.JSXIdentifier,
     {node: ThisAndArgumentsScope; parents: t.Node[]}
   >;
   argumentsReferences: Map<
     ThisAndArgumentsScope,
-    {node: t.Identifier; parents: t.Node[]}[]
+    {node: t.Identifier|t.JSXIdentifier; parents: t.Node[]}[]
   >;
 
   thisDeclarations: Map<
@@ -49,13 +49,13 @@ export interface ScopeInfo {
     {node: t.ThisExpression; parents: t.Node[]}[]
   >;
 
-  globals: Map<string, {node: t.Identifier; parents: t.Node[]}[]>;
+  globals: Map<string, {node: t.Identifier|t.JSXIdentifier; parents: t.Node[]}[]>;
   globalThisRefrences: {node: t.ThisExpression; parents: t.Node[]}[];
 }
 interface Context extends ScopeInfo {
   declarationsByName: Map<
     BlockScope,
-    Map<string, {node: t.Identifier; parents: t.Node[]}>
+    Map<string, {node: t.Identifier|t.JSXIdentifier; parents: t.Node[]}>
   >;
 }
 
@@ -210,46 +210,54 @@ const firstPass = walk<Context>({
 
 // Second pass
 
-const secondPass = walk<Context>({
-  Identifier(node, state, parents) {
-    const name = node.name;
-    if (name === 'undefined') return;
-    const parentsSorted = parents.slice().reverse().slice(1);
+const processIdentifier = (node: t.JSXIdentifier | t.Identifier, state: Context, parents: ReadonlyArray<t.Node>) => {
+  const name = node.name;
+  if (name === 'undefined') return;
+  const parentsSorted = parents.slice().reverse().slice(1);
 
-    const lastParent = parents[parents.length - 2];
-    if (lastParent) {
-      if (!isReference(node, lastParent, parents[parents.length - 3])) return;
-      for (const parent of parentsSorted) {
-        if (name === 'arguments' && declaresArguments(parent)) {
-          state.argumentsDeclarations.set(node, {
-            node: parent,
-            parents: parentsSorted.slice(parentsSorted.indexOf(parent) + 1),
-          });
-          state.argumentsReferences.set(parent, [
-            ...(state.argumentsReferences.get(parent) || []),
-            {node, parents: parentsSorted},
-          ]);
+  const lastParent = parents[parents.length - 2];
+  if (lastParent) {
+    if (!isReference(node, lastParent, parents[parents.length - 3])) return;
+    for (const parent of parentsSorted) {
+      if (name === 'arguments' && declaresArguments(parent)) {
+        state.argumentsDeclarations.set(node, {
+          node: parent,
+          parents: parentsSorted.slice(parentsSorted.indexOf(parent) + 1),
+        });
+        state.argumentsReferences.set(parent, [
+          ...(state.argumentsReferences.get(parent) || []),
+          {node, parents: parentsSorted},
+        ]);
+        return;
+      }
+      const declaration = getLocals(state, parent)?.get(name);
+      if (declaration) {
+        if (declaration.node === node) {
           return;
         }
-        const declaration = getLocals(state, parent)?.get(name);
-        if (declaration) {
-          if (declaration.node === node) {
-            return;
-          }
-          state.declarations.set(node, declaration);
-          state.references.set(declaration.node, [
-            ...(state.references.get(declaration.node) || []),
-            {node, parents: parentsSorted},
-          ]);
-          return;
-        }
+        state.declarations.set(node, declaration);
+        state.references.set(declaration.node, [
+          ...(state.references.get(declaration.node) || []),
+          {node, parents: parentsSorted},
+        ]);
+        return;
       }
     }
+  }
 
-    state.globals.set(node.name, [
-      ...(state.globals.get(node.name) || []),
-      {node, parents: parentsSorted},
-    ]);
+  state.globals.set(node.name, [
+    ...(state.globals.get(node.name) || []),
+    {node, parents: parentsSorted},
+  ]);
+};
+
+const secondPass = walk<Context>({
+  Identifier(node, state, parents) {
+    processIdentifier(node, state, parents);
+  },
+
+  JSXIdentifier(node, state, parents) {
+    processIdentifier(node, state, parents);
   },
 
   ThisExpression(node, state, parents) {

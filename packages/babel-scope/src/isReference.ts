@@ -1,7 +1,7 @@
 import * as t from '@babel/types';
 
 export default function isReference(
-  node: t.Identifier,
+  node: t.Identifier | t.JSXIdentifier,
   parent: t.Node,
   grandParent: t.Node,
 ) {
